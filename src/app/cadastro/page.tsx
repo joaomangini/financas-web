@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch, setTokens } from "@/lib/api";
 
-export default function LoginPage() {
+export default function CadastroPage() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -17,17 +18,16 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    // O servidor gratuito (Render) "dorme" e pode levar ~50s pra acordar.
     const slowTimer = setTimeout(() => setSlow(true), 4000);
     try {
-      const data = await apiFetch("/auth/login", {
+      const data = await apiFetch("/auth/register", {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
       setTokens(data.accessToken, data.refreshToken);
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao entrar");
+      setError(err instanceof Error ? err.message : "Erro ao cadastrar");
     } finally {
       clearTimeout(slowTimer);
       setLoading(false);
@@ -42,7 +42,7 @@ export default function LoginPage() {
         className="w-full max-w-sm rounded-xl bg-white p-8 shadow-md"
       >
         <h1 className="mb-6 text-center text-2xl font-bold text-emerald-600">
-          💰 Entrar
+          💰 Criar conta
         </h1>
 
         {error && (
@@ -50,6 +50,17 @@ export default function LoginPage() {
             {error}
           </p>
         )}
+
+        <label className="mb-1 block text-sm font-medium text-zinc-700">
+          Nome
+        </label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="mb-4 w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none focus:border-emerald-500"
+        />
 
         <label className="mb-1 block text-sm font-medium text-zinc-700">
           E-mail
@@ -70,28 +81,30 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="mb-6 w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none focus:border-emerald-500"
+          minLength={6}
+          className="mb-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none focus:border-emerald-500"
         />
+        <p className="mb-6 text-xs text-zinc-400">Mínimo 6 caracteres.</p>
 
         <button
           type="submit"
           disabled={loading}
           className="w-full rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
         >
-          {loading ? "Entrando..." : "Entrar"}
+          {loading ? "Criando..." : "Criar conta"}
         </button>
 
         {slow && (
           <p className="mt-3 text-center text-xs text-zinc-500">
-            ⏳ O servidor gratuito está acordando — a primeira entrada pode
-            levar até 1 minuto. Pode aguardar...
+            ⏳ O servidor gratuito está acordando — pode levar até 1 minuto.
+            Aguarde...
           </p>
         )}
 
         <p className="mt-4 text-center text-sm text-zinc-500">
-          Não tem conta?{" "}
-          <Link href="/cadastro" className="font-medium text-emerald-600">
-            Cadastre-se
+          Já tem conta?{" "}
+          <Link href="/login" className="font-medium text-emerald-600">
+            Entrar
           </Link>
         </p>
       </form>

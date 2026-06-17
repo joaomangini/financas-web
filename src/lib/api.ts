@@ -34,7 +34,11 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.message || `Erro ${res.status}`);
+    // A API (class-validator) pode mandar vários erros num array.
+    const msg = Array.isArray(body.message)
+      ? body.message.join(", ")
+      : body.message;
+    throw new Error(msg || `Erro ${res.status}`);
   }
 
   if (res.status === 204) return null; // sem conteúdo (ex.: DELETE)
