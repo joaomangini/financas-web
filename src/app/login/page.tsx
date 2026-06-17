@@ -10,11 +10,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [slow, setSlow] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
+    // O servidor gratuito (Render) "dorme" e pode levar ~50s pra acordar.
+    const slowTimer = setTimeout(() => setSlow(true), 4000);
     try {
       const data = await apiFetch("/auth/login", {
         method: "POST",
@@ -25,7 +28,9 @@ export default function LoginPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao entrar");
     } finally {
+      clearTimeout(slowTimer);
       setLoading(false);
+      setSlow(false);
     }
   }
 
@@ -74,6 +79,13 @@ export default function LoginPage() {
         >
           {loading ? "Entrando..." : "Entrar"}
         </button>
+
+        {slow && (
+          <p className="mt-3 text-center text-xs text-zinc-500">
+            ⏳ O servidor gratuito está acordando — a primeira entrada pode
+            levar até 1 minuto. Pode aguardar...
+          </p>
+        )}
       </form>
     </main>
   );
