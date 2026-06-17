@@ -75,6 +75,15 @@ export default function DashboardPage() {
             <div className="mt-2 font-semibold text-zinc-800">Relatórios</div>
             <div className="text-xs text-zinc-500">Resumo do mês por categoria</div>
           </Link>
+
+          <Link
+            href="/orcamentos"
+            className="rounded-xl bg-white p-5 shadow-sm transition hover:shadow-md"
+          >
+            <div className="text-2xl">🎯</div>
+            <div className="mt-2 font-semibold text-zinc-800">Orçamentos</div>
+            <div className="text-xs text-zinc-500">Planejado vs gasto do mês</div>
+          </Link>
         </div>
       </main>
     </div>

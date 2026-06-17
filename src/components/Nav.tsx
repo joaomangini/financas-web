@@ -30,6 +30,9 @@ export default function Nav() {
         <Link href="/relatorios" className="text-sm text-zinc-600 hover:text-emerald-600">
           Relatórios
         </Link>
+        <Link href="/orcamentos" className="text-sm text-zinc-600 hover:text-emerald-600">
+          Orçamentos
+        </Link>
       </div>
       <button
         onClick={logout}
