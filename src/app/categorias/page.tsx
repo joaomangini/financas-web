@@ -20,6 +20,9 @@ export default function CategoriasPage() {
   const [color, setColor] = useState("#ef4444");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editColor, setEditColor] = useState("#ef4444");
 
   async function load() {
     try {
@@ -62,6 +65,28 @@ export default function CategoriasPage() {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao excluir");
+    }
+  }
+
+  function startEdit(c: Category) {
+    setEditingId(c.id);
+    setEditName(c.name);
+    setEditColor(c.color ?? "#ef4444");
+  }
+
+  async function handleUpdate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingId) return;
+    setError("");
+    try {
+      await apiFetch(`/categories/${editingId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name: editName, color: editColor }),
+      });
+      setEditingId(null);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao salvar");
     }
   }
 
@@ -123,33 +148,76 @@ export default function CategoriasPage() {
         ) : (
           <ul className="space-y-2">
             {categories.map((c) => (
-              <li
-                key={c.id}
-                className="flex items-center justify-between rounded-lg bg-white p-4 shadow-sm"
-              >
-                <span className="flex items-center gap-3 text-zinc-800">
-                  <span
-                    className="h-4 w-4 rounded-full"
-                    style={{ backgroundColor: c.color ?? "#d4d4d8" }}
-                  />
-                  {c.name}
-                </span>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`text-xs font-medium ${
-                      c.type === "INCOME" ? "text-emerald-600" : "text-red-600"
-                    }`}
+              <li key={c.id} className="rounded-lg bg-white p-4 shadow-sm">
+                {editingId === c.id ? (
+                  <form
+                    onSubmit={handleUpdate}
+                    className="flex flex-wrap items-center gap-2"
                   >
-                    {c.type === "INCOME" ? "Receita" : "Despesa"}
-                  </span>
-                  <button
-                    onClick={() => handleDelete(c.id)}
-                    title="Excluir"
-                    className="text-zinc-400 transition hover:text-red-600"
-                  >
-                    🗑️
-                  </button>
-                </div>
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      required
+                      className="flex-1 rounded-lg border border-zinc-300 px-2 py-1 text-sm text-zinc-900 outline-none focus:border-emerald-500"
+                    />
+                    <input
+                      type="color"
+                      value={editColor}
+                      onChange={(e) => setEditColor(e.target.value)}
+                      title="Cor"
+                      className="h-8 w-10 cursor-pointer rounded border border-zinc-300"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-lg bg-emerald-600 px-3 py-1 text-sm font-medium text-white hover:bg-emerald-700"
+                    >
+                      Salvar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(null)}
+                      className="rounded-lg border border-zinc-300 px-3 py-1 text-sm text-zinc-600 hover:bg-zinc-100"
+                    >
+                      Cancelar
+                    </button>
+                  </form>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-3 text-zinc-800">
+                      <span
+                        className="h-4 w-4 rounded-full"
+                        style={{ backgroundColor: c.color ?? "#d4d4d8" }}
+                      />
+                      {c.name}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`text-xs font-medium ${
+                          c.type === "INCOME"
+                            ? "text-emerald-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {c.type === "INCOME" ? "Receita" : "Despesa"}
+                      </span>
+                      <button
+                        onClick={() => startEdit(c)}
+                        title="Editar"
+                        className="text-zinc-400 transition hover:text-emerald-600"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => handleDelete(c.id)}
+                        title="Excluir"
+                        className="text-zinc-400 transition hover:text-red-600"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
           </ul>

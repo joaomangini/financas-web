@@ -33,6 +33,9 @@ export default function TransacoesPage() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDescription, setEditDescription] = useState("");
+  const [editAmount, setEditAmount] = useState("");
 
   async function load() {
     try {
@@ -99,6 +102,31 @@ export default function TransacoesPage() {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao excluir");
+    }
+  }
+
+  function startEdit(t: Transaction) {
+    setEditingId(t.id);
+    setEditDescription(t.description);
+    setEditAmount(String(t.amount));
+  }
+
+  async function handleUpdate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingId) return;
+    setError("");
+    try {
+      await apiFetch(`/transactions/${editingId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          description: editDescription,
+          amount: Number(editAmount),
+        }),
+      });
+      setEditingId(null);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao salvar");
     }
   }
 
@@ -202,35 +230,79 @@ export default function TransacoesPage() {
         ) : (
           <ul className="space-y-2">
             {transactions.map((t) => (
-              <li
-                key={t.id}
-                className="flex items-center justify-between rounded-lg bg-white p-4 shadow-sm"
-              >
-                <div>
-                  <p className="text-zinc-800">{t.description}</p>
-                  <p className="text-xs text-zinc-400">
-                    {new Date(t.date).toLocaleDateString("pt-BR")}
-                    {t.account ? ` · ${t.account.name}` : ""}
-                    {t.category ? ` · ${t.category.name}` : ""}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`font-semibold ${
-                      t.type === "INCOME" ? "text-emerald-600" : "text-red-600"
-                    }`}
+              <li key={t.id} className="rounded-lg bg-white p-4 shadow-sm">
+                {editingId === t.id ? (
+                  <form
+                    onSubmit={handleUpdate}
+                    className="flex flex-wrap items-center gap-2"
                   >
-                    {t.type === "INCOME" ? "+" : "-"} R${" "}
-                    {Number(t.amount).toFixed(2)}
-                  </span>
-                  <button
-                    onClick={() => handleDelete(t.id)}
-                    title="Excluir"
-                    className="text-zinc-400 transition hover:text-red-600"
-                  >
-                    🗑️
-                  </button>
-                </div>
+                    <input
+                      type="text"
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      required
+                      className="flex-1 rounded-lg border border-zinc-300 px-2 py-1 text-sm text-zinc-900 outline-none focus:border-emerald-500"
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editAmount}
+                      onChange={(e) => setEditAmount(e.target.value)}
+                      required
+                      className="w-28 rounded-lg border border-zinc-300 px-2 py-1 text-sm text-zinc-900 outline-none focus:border-emerald-500"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-lg bg-emerald-600 px-3 py-1 text-sm font-medium text-white hover:bg-emerald-700"
+                    >
+                      Salvar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(null)}
+                      className="rounded-lg border border-zinc-300 px-3 py-1 text-sm text-zinc-600 hover:bg-zinc-100"
+                    >
+                      Cancelar
+                    </button>
+                  </form>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-zinc-800">{t.description}</p>
+                      <p className="text-xs text-zinc-400">
+                        {new Date(t.date).toLocaleDateString("pt-BR")}
+                        {t.account ? ` · ${t.account.name}` : ""}
+                        {t.category ? ` · ${t.category.name}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`font-semibold ${
+                          t.type === "INCOME"
+                            ? "text-emerald-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {t.type === "INCOME" ? "+" : "-"} R${" "}
+                        {Number(t.amount).toFixed(2)}
+                      </span>
+                      <button
+                        onClick={() => startEdit(t)}
+                        title="Editar"
+                        className="text-zinc-400 transition hover:text-emerald-600"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => handleDelete(t.id)}
+                        title="Excluir"
+                        className="text-zinc-400 transition hover:text-red-600"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
