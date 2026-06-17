@@ -67,11 +67,14 @@ export default function DashboardPage() {
             <div className="text-xs text-zinc-500">Lançar entradas e saídas</div>
           </Link>
 
-          <div className="rounded-xl bg-white p-5 opacity-50 shadow-sm">
+          <Link
+            href="/relatorios"
+            className="rounded-xl bg-white p-5 shadow-sm transition hover:shadow-md"
+          >
             <div className="text-2xl">📊</div>
             <div className="mt-2 font-semibold text-zinc-800">Relatórios</div>
-            <div className="text-xs text-zinc-500">Em breve</div>
-          </div>
+            <div className="text-xs text-zinc-500">Resumo do mês por categoria</div>
+          </Link>
         </div>
       </main>
     </div>
