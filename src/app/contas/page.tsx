@@ -32,6 +32,9 @@ export default function ContasPage() {
   const [initialBalance, setInitialBalance] = useState("0");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editType, setEditType] = useState("CHECKING");
 
   async function load() {
     try {
@@ -86,6 +89,28 @@ export default function ContasPage() {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao excluir");
+    }
+  }
+
+  function startEdit(a: Account) {
+    setEditingId(a.id);
+    setEditName(a.name);
+    setEditType(a.type);
+  }
+
+  async function handleUpdate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingId) return;
+    setError("");
+    try {
+      await apiFetch(`/accounts/${editingId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name: editName, type: editType }),
+      });
+      setEditingId(null);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao salvar");
     }
   }
 
@@ -153,32 +178,79 @@ export default function ContasPage() {
         ) : (
           <ul className="space-y-2">
             {accounts.map((a) => (
-              <li
-                key={a.id}
-                className="flex items-center justify-between rounded-lg bg-white p-4 shadow-sm"
-              >
-                <span className="text-zinc-800">
-                  {a.name}{" "}
-                  <span className="text-xs text-zinc-400">
-                    ({tipoLabel(a.type)})
-                  </span>
-                </span>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`font-semibold ${
-                      Number(a.balance) < 0 ? "text-red-600" : "text-emerald-600"
-                    }`}
+              <li key={a.id} className="rounded-lg bg-white p-4 shadow-sm">
+                {editingId === a.id ? (
+                  <form
+                    onSubmit={handleUpdate}
+                    className="flex flex-wrap items-center gap-2"
                   >
-                    R$ {Number(a.balance).toFixed(2)}
-                  </span>
-                  <button
-                    onClick={() => handleDelete(a.id)}
-                    title="Excluir"
-                    className="text-zinc-400 transition hover:text-red-600"
-                  >
-                    🗑️
-                  </button>
-                </div>
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      required
+                      className="flex-1 rounded-lg border border-zinc-300 px-2 py-1 text-sm text-zinc-900 outline-none focus:border-emerald-500"
+                    />
+                    <select
+                      value={editType}
+                      onChange={(e) => setEditType(e.target.value)}
+                      className="rounded-lg border border-zinc-300 px-2 py-1 text-sm text-zinc-900 outline-none focus:border-emerald-500"
+                    >
+                      {TIPOS.map((t) => (
+                        <option key={t.value} value={t.value}>
+                          {t.label}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="submit"
+                      className="rounded-lg bg-emerald-600 px-3 py-1 text-sm font-medium text-white hover:bg-emerald-700"
+                    >
+                      Salvar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(null)}
+                      className="rounded-lg border border-zinc-300 px-3 py-1 text-sm text-zinc-600 hover:bg-zinc-100"
+                    >
+                      Cancelar
+                    </button>
+                  </form>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-800">
+                      {a.name}{" "}
+                      <span className="text-xs text-zinc-400">
+                        ({tipoLabel(a.type)})
+                      </span>
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`font-semibold ${
+                          Number(a.balance) < 0
+                            ? "text-red-600"
+                            : "text-emerald-600"
+                        }`}
+                      >
+                        R$ {Number(a.balance).toFixed(2)}
+                      </span>
+                      <button
+                        onClick={() => startEdit(a)}
+                        title="Editar"
+                        className="text-zinc-400 transition hover:text-emerald-600"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => handleDelete(a.id)}
+                        title="Excluir"
+                        className="text-zinc-400 transition hover:text-red-600"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
