@@ -1,8 +1,15 @@
 # 💰 Finanças Web
 
-Interface (frontend) do app de finanças pessoais. Consome a **Finanças API** (NestJS) e oferece login, cadastro de contas, categorias e lançamento de transações.
+Interface (frontend) de um app de finanças pessoais. Consome a **Finanças API** (NestJS) e oferece login/cadastro, contas, categorias, transações, orçamentos e relatórios.
 
-> Frontend do projeto **Finanças** — a API fica no repositório `financas-api`. Este repositório é só a "cara bonita" que conversa com ela.
+> Frontend do projeto **Finanças**. A API fica no repositório [`financas-api`](https://github.com/joaomangini/financas-api).
+
+## 🔗 Demo ao vivo
+
+- 🌐 **App:** https://financas-web-lac.vercel.app
+- 🔌 **API:** https://financas-api-wssv.onrender.com/api
+
+> ⏳ A API roda no plano gratuito da Render e "dorme" após ~15 min de inatividade — o primeiro acesso pode levar ~50s pra "acordar". Depois fica rápido.
 
 ## 🧱 Stack
 
@@ -10,48 +17,45 @@ Interface (frontend) do app de finanças pessoais. Consome a **Finanças API** (
 - **TypeScript**
 - **Tailwind CSS**
 - Autenticação via **JWT** (access token guardado no navegador)
+- Deploy: **Vercel** (frontend) + **Render** (API) + **Neon** (PostgreSQL)
 
 ## ✨ Funcionalidades
 
-- 🔐 **Login** — consome `POST /auth/login`, guarda o token e protege as rotas internas
-- 💳 **Contas** — criar, listar e excluir (mostra o saldo calculado pela API)
-- 🏷️ **Categorias** — criar, listar e excluir (receita/despesa, com cor)
-- 💸 **Transações** — lançar, listar e excluir (o seletor de categoria filtra pelo tipo escolhido)
-- 🔄 Saldos e listas sempre recarregados da API após cada ação
+- 🔐 **Login e cadastro** de usuários (JWT)
+- 💳 **Contas** — criar, listar, **editar** e excluir (com saldo calculado)
+- 🏷️ **Categorias** — criar, listar, **editar** e excluir (receita/despesa, com cor)
+- 💸 **Transações** — lançar, listar, **editar** e excluir (categoria filtrada por tipo)
+- 🎯 **Orçamentos** — definir limite por categoria e acompanhar planejado vs gasto
+- 📊 **Relatórios** — resumo do mês (receitas/despesas/saldo) e despesas por categoria
+- ⏳ Aviso amigável quando a API gratuita está "acordando" (cold start)
 
 ## 🚀 Como rodar (local)
 
 1. Tenha a **API** rodando primeiro (`financas-api`, em `http://localhost:3000/api`).
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
-3. Crie o arquivo `.env.local` com o endereço da API:
+2. Instale as dependências: `npm install`
+3. Crie o `.env.local` com o endereço da API:
    ```
    NEXT_PUBLIC_API_URL=http://localhost:3000/api
    ```
-4. Suba o frontend (porta **3001**, pra não conflitar com a API):
-   ```bash
-   npm run dev
-   ```
+4. Suba o frontend (porta **3001**, pra não conflitar com a API): `npm run dev`
 5. Abra **http://localhost:3001**.
-
-> No Windows, há o atalho **"Iniciar Site"** na Área de Trabalho que já faz isso.
 
 ## 🔗 Arquitetura
 
 ```
-Navegador  →  Frontend (Next.js, :3001)  →  API (NestJS, :3000)  →  PostgreSQL (Neon, nuvem)
+Navegador  →  Frontend (Next.js)  →  API (NestJS)  →  PostgreSQL (Neon)
+                                          ↑
+                              n8n → Telegram (alerta de gasto + relatório mensal)
 ```
 
 O frontend nunca fala direto com o banco — sempre passa pela API, que valida a autenticação.
 
 ## 🗺️ Roadmap
 
-- [x] Login + área logada (dashboard)
-- [x] Contas, Categorias e Transações (criar / listar / excluir)
-- [ ] Relatórios (resumo do mês, com gráfico)
-- [ ] Orçamentos (planejado vs gasto)
-- [ ] Editar registros (não só criar/excluir)
-- [ ] Cadastro de novo usuário
-- [ ] Deploy na Vercel
+- [x] Login + cadastro + área logada (dashboard)
+- [x] Contas, Categorias e Transações (criar / editar / listar / excluir)
+- [x] Orçamentos (planejado vs gasto)
+- [x] Relatórios (resumo do mês + despesas por categoria)
+- [x] Deploy na Vercel (frontend) e Render (API)
+- [ ] Importar CSV pela interface
+- [ ] Multiusuário: cada usuário recebe o próprio relatório no Telegram
