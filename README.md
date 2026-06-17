@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💰 Finanças Web
 
-## Getting Started
+Interface (frontend) do app de finanças pessoais. Consome a **Finanças API** (NestJS) e oferece login, cadastro de contas, categorias e lançamento de transações.
 
-First, run the development server:
+> Frontend do projeto **Finanças** — a API fica no repositório `financas-api`. Este repositório é só a "cara bonita" que conversa com ela.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🧱 Stack
+
+- **Next.js 16** (App Router) + **React 19**
+- **TypeScript**
+- **Tailwind CSS**
+- Autenticação via **JWT** (access token guardado no navegador)
+
+## ✨ Funcionalidades
+
+- 🔐 **Login** — consome `POST /auth/login`, guarda o token e protege as rotas internas
+- 💳 **Contas** — criar, listar e excluir (mostra o saldo calculado pela API)
+- 🏷️ **Categorias** — criar, listar e excluir (receita/despesa, com cor)
+- 💸 **Transações** — lançar, listar e excluir (o seletor de categoria filtra pelo tipo escolhido)
+- 🔄 Saldos e listas sempre recarregados da API após cada ação
+
+## 🚀 Como rodar (local)
+
+1. Tenha a **API** rodando primeiro (`financas-api`, em `http://localhost:3000/api`).
+2. Instale as dependências:
+   ```bash
+   npm install
+   ```
+3. Crie o arquivo `.env.local` com o endereço da API:
+   ```
+   NEXT_PUBLIC_API_URL=http://localhost:3000/api
+   ```
+4. Suba o frontend (porta **3001**, pra não conflitar com a API):
+   ```bash
+   npm run dev
+   ```
+5. Abra **http://localhost:3001**.
+
+> No Windows, há o atalho **"Iniciar Site"** na Área de Trabalho que já faz isso.
+
+## 🔗 Arquitetura
+
+```
+Navegador  →  Frontend (Next.js, :3001)  →  API (NestJS, :3000)  →  PostgreSQL (Neon, nuvem)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+O frontend nunca fala direto com o banco — sempre passa pela API, que valida a autenticação.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🗺️ Roadmap
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [x] Login + área logada (dashboard)
+- [x] Contas, Categorias e Transações (criar / listar / excluir)
+- [ ] Relatórios (resumo do mês, com gráfico)
+- [ ] Orçamentos (planejado vs gasto)
+- [ ] Editar registros (não só criar/excluir)
+- [ ] Cadastro de novo usuário
+- [ ] Deploy na Vercel
